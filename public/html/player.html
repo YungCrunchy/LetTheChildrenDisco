@@ -1,6 +1,28 @@
-<audio controls="controls" autoplay="true">
+<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
+
+<audio controls="controls" autoplay="autoplay" id="player">
     <source src="http://webaudioapi.com/samples/audio-tag/chrono.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
 </audio>
 
-<script src="../js/player.js"></script>
+<script>
+
+    console.log("outer");
+    $( document ).ready(function() {
+
+
+        // Check for the various File API support.
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            // Great success! All the File APIs are supported.
+        } else {
+            alert('The File APIs are not fully supported in this browser.');
+        }
+
+
+
+        var player = $('#player').get(0);
+        player.loop = true;
+    })
+</script>
