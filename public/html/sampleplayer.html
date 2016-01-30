@@ -1,16 +1,6 @@
 
 <div id="container">
 
-    <div id="nav">
-        <ul>
-            <li><a href="/samples">Samples</a>
-            </li>
-        </ul>
-    </div>
-
-    <div id="header">
-        <h1><a href="/">Web Audio API</a></h1>
-    </div>
 
 
     <div id="wrapper">
@@ -31,8 +21,8 @@
                 <p><input value="http://webaudioapi.com/samples/audio-tag/chrono.mp3" placeholder="URL to audio file...">
                     <button onclick="sample.play(document.querySelector('input').value)">Load URL</button></p>
 
-                <script src="/static/js/shared.js"></script>
-                <script src="audio-tag-sample.js"></script>
+                <script src="http://webaudioapi.com/samples/audio-tag/static/js/shared.js"></script>
+                <script src="http://webaudioapi.com/samples/audio-tag/audio-tag-sample.js"></script>
                 <script>
                     var input = document.querySelector('input');
                     var sample = new AudioTagSample();
