@@ -1,4 +1,93 @@
-<audio controls="controls">
-    <source src="http://webaudioapi.com/samples/audio-tag/chrono.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-</audio>
+<script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
+<ul>
+    <li>
+        <input type="file" id="files" name="files[]" multiple />
+        <output id="playlist"></output>
+    </li>
+    <li>
+        <audio controls="controls" autoplay="autoplay" id="player">
+            <source src="http://webaudioapi.com/samples/audio-tag/chrono.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </li>
+</ul>
+<script>
+
+    console.log("outer");
+    $( document ).ready(function() {
+
+
+        var files = [];
+
+        // from http://www.html5rocks.com/en/tutorials/file/dndfiles/
+        // Check for the various File API support.
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            // Great success! All the File APIs are supported.
+        } else {
+            alert('The File APIs are not fully supported in this browser.');
+        }
+
+
+//
+//        function handleFileSelect(evt) {
+//            var files = evt.target.files; // FileList object
+//
+//            // files is a FileList of File objects. List some properties.
+//            var output = [];
+//            for (var i = 0, f; f = files[i]; i++) {
+//                output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+//                        f.size, ' bytes, last modified: ',
+//                        f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+//                        '</li>');
+//            }
+//            document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+//        }
+//
+//        document.getElementById('files').addEventListener('change', handleFileSelect, false);
+//
+
+
+        $("#files").change(function(e){
+
+            files = e.currentTarget.files;
+            var file = files[0];
+
+            console.log(files);
+
+            $("#filename").text(file.name);
+            $("#filetype").text(file.type);
+            $("#filesize").text(file.size);
+
+            objectUrl = URL.createObjectURL(file);
+            $("#player").prop("src", objectUrl);
+
+
+            //todo update this when songs are done
+            var output = [];
+            for (var i = 0, f; f = files[i]; i++) {
+                output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                        f.size, ' bytes, last modified: ',
+                        f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                        '</li>');
+            }
+            document.getElementById('playlist').innerHTML = '<ul>' + output.join('') + '</ul>';
+
+        });
+
+
+
+        var peer = new Peer('someid', {host: 'localhost', port: 9000, path: '/peer'});
+
+        console.log(peer);
+
+        var player = $('#player').get(0);
+        player.loop = true;
+
+        player.onended = function(){
+            files.shift();
+            player.src = files[0];
+        }
+    })
+</script>
