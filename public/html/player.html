@@ -29,17 +29,6 @@
             alert('The File APIs are not fully supported in this browser.');
         }
 
-        if (RTCPeerConnection) {
-        } else {
-            alert('RTCPeerConnection is not supported by your browser')
-        }
-
-        if (window.AudioContext || window.webkitAudioContext){
-            window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        } else {
-            alert("this is not going to work")
-        }
-
 
 //
 //        function handleFileSelect(evt) {
@@ -88,6 +77,10 @@
         });
 
 
+
+        var peer = new Peer('someid', {host: 'localhost', port: 9000, path: '/peer'});
+
+        console.log(peer);
 
         var player = $('#player').get(0);
         player.loop = true;
