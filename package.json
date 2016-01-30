@@ -1,6 +1,7 @@
 {
   "name": "LetTheChildrenTechno",
   "version": "0.0.0",
+  "main": "app.js",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -14,4 +15,7 @@
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0"
   }
+  "engines": {
+    "node": "4.2.6"
+  },
 }
