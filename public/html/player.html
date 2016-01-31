@@ -28,16 +28,8 @@
     </li>
 </ul>
 
-<h4 id="counter"></h4>
+<h4 id="counter">Connected peers: 0</h4>
 <h4 id="room"></h4>
-
-<style>
-    #messages {
-        border: 1px solid black;
-        min-height: 20px;
-    }
-</style>
-<div id="messages" contenteditable></div>
 
 
 <script src="/js/common.js"></script>
@@ -108,15 +100,21 @@
 
             // create a data channel for sending the media description
             peers[from].dataChannel = peers[from].peerconnection.createDataChannel('mediaDescription', { reliable: true });
+
+
             peers[from].dataChannel.onopen = function() {
                 startPlayingIfPossible(from);
+                console.log(from);
             };
 
             peers[from].peerconnection.createOffer(function(desc) {
                 gotDescription(from, desc);
             }, failed);
 
-            counter.innerHTML = Object.keys(peers).length;
+            counter.innerHTML = "Connected Peers: " + Object.keys(peers).length;
+            console.log("added peer");
+
+            startPlayingIfPossible(from);
 
         });
 
@@ -133,7 +131,7 @@
 
             peers[message.from].stream = undefined;
             delete peers[message.from];
-            counter.innerHTML = Object.keys(peers).length;
+            counter.innerHTML = "Connected Peers: " + Object.keys(peers).length;
         });
 
 
