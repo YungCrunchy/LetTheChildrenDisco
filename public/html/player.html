@@ -82,6 +82,9 @@
 
         var peer = new Peer('1234567', {host: 'localhost', port: 3000, path: '/peerjs'});
 
+        peer.connect('1234567');
+
+
         console.log(peer);
 
         var player = $('#player').get(0);
