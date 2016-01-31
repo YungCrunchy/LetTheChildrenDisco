@@ -15,6 +15,8 @@
         <output id="playlist"></output>
     </li>
     <li>
+        <button class="play" id="play" name="play">Play</button>
+        <button class="stop" id="stop" name="stop">Stop</button>
         <!--<audio controls="controls" autoplay="autoplay" id="player">-->
             <!--<source src="http://webaudioapi.com/samples/audio-tag/chrono.mp3" type="audio/mpeg">-->
             <!--Your browser does not support the audio element.-->
@@ -96,6 +98,15 @@
 
 
         var soundSource = audioCtx.createBufferSource();
+
+
+        $('#play').click(function (e) {
+            soundSource.resume();
+        });
+
+        $('#stop').click(function (e) {
+            soundSource.suspend();
+        })
 
         $('#files').change(function (e){
 //
