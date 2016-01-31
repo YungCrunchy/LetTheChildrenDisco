@@ -14,7 +14,7 @@ var broadcaster = require('./routes/broadcaster');
 var app = express();
 var peers = [];
 
-var ExpressPeerServer = require('peer').ExpressPeerServer;
+//var ExpressPeerServer = require('peer').ExpressPeerServer;
 //var server = require('http').createServer(app);
 //var options = {debug: true};
 //app.use('/peerjs', ExpressPeerServer(server, options));
