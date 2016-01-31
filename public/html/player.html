@@ -1,5 +1,7 @@
 <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<script src="/js/peer.js"></script>
+<script src="/js/jsmediatags.js"></script>
 
 <ul>
     <li>
@@ -78,9 +80,27 @@
 
 
 
-        var peer = new Peer('someid', {host: 'localhost', port: 9000, path: '/peer'});
+//        var peer = new Peer('1234567', { key:'a3g2zb1cpmeipb9', port: 9000, path: '/peerjs',
+//        });
+
+        var peer = new Peer({key: 'a3g2zb1cpmeipb9'});
+
+        var conn = peer.connect('1234567');
+
+        peer.on('connect', function(data){
+           alert("connected");
+        });
+
+
+        conn.localStream
+        conn.on('data', function(data){
+            console.log(data);
+        }
+        );
+
 
         console.log(peer);
+        console.log(conn);
 
         var player = $('#player').get(0);
         player.loop = true;
