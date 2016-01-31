@@ -2,6 +2,12 @@
 <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 <script src="/js/peer.js"></script>
 <script src="/js/jsmediatags.js"></script>
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection.js"></script>
+<script src="//cdn.webrtc-experiment.com/firebase.js"></script>
+
+<!--<input type="file">-->
+<!--<button id="openNewSessionButton" disabled>Open New Room</button>-->
+<!--<br />-->
 
 <ul>
     <li>
@@ -9,10 +15,10 @@
         <output id="playlist"></output>
     </li>
     <li>
-        <audio controls="controls" autoplay="autoplay" id="player">
-            <source src="http://webaudioapi.com/samples/audio-tag/chrono.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
+        <!--<audio controls="controls" autoplay="autoplay" id="player">-->
+            <!--<source src="http://webaudioapi.com/samples/audio-tag/chrono.mp3" type="audio/mpeg">-->
+            <!--Your browser does not support the audio element.-->
+        <!--</audio>-->
     </li>
 </ul>
 <script>
@@ -32,7 +38,7 @@
         }
 
 
-//
+
 //        function handleFileSelect(evt) {
 //            var files = evt.target.files; // FileList object
 //
@@ -44,55 +50,30 @@
 //                        f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
 //                        '</li>');
 //            }
-//            document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
-//        }
+//            document.getElementById('playlist').innerHTML = '<ul>' + output.join('') + '</ul>';
 //
-//        document.getElementById('files').addEventListener('change', handleFileSelect, false);
-//
-
-
-        $("#files").change(function(e){
-
-            files = e.currentTarget.files;
-            var file = files[0];
-
-            console.log(files);
-
-            $("#filename").text(file.name);
-            $("#filetype").text(file.type);
-            $("#filesize").text(file.size);
-
-            objectUrl = URL.createObjectURL(file);
-            $("#player").prop("src", objectUrl);
-
-
-            //todo update this when songs are done
-            var output = [];
-            for (var i = 0, f; f = files[i]; i++) {
-                output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-                        f.size, ' bytes, last modified: ',
-                        f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-                        '</li>');
-            }
-            document.getElementById('playlist').innerHTML = '<ul>' + output.join('') + '</ul>';
-
-        });
-
-
-
-//        var peer = new Peer('1234567', { key:'a3g2zb1cpmeipb9', port: 9000, path: '/peerjs',
 //        });
 
-        var peer = new Peer({key: 'a3g2zb1cpmeipb9'});
+
+
+
+
+//        var peer = new Peer('1234567', { host:'localhost', port: 3000, path: '/peerjs',
+//        });
+
+        var peer = new Peer({key: 'a3g2zb1cpmeipb9', id: '1234567'});
 
         var conn = peer.connect('1234567');
+
+        conn.send("hello");
 
         peer.on('connect', function(data){
            alert("connected");
         });
 
 
-        conn.localStream
+
+
         conn.on('data', function(data){
             console.log(data);
         }
@@ -102,12 +83,107 @@
         console.log(peer);
         console.log(conn);
 
-        var player = $('#player').get(0);
-        player.loop = true;
+//        var player = $('#player').get(0);
+//        player.loop = true;
 
-        player.onended = function(){
-            files.shift();
-            player.src = files[0];
-        }
+
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        var audioCtx = new AudioContext();
+        var gainNode = audioCtx.createGain();
+        gainNode.connect(audioCtx.destination);
+        // don't play for self
+//    gainNode.gain.value = 100;
+
+
+        var soundSource = audioCtx.createBufferSource();
+
+        $('#files').change(function (e){
+//
+
+            var files = e.currentTarget.files;
+            console.log('file change');
+//        });
+//
+//        document.querySelector('input[type=file]').onchange = function() {
+            var reader = new FileReader();
+            reader.onload = (function(e) {
+                // Import callback function that provides PCM audio data decoded as an audio buffer
+                audioCtx.decodeAudioData(e.target.result, function(buffer) {
+                    // Create the sound source
+                    if(soundSource.buffer) {
+                        soundSource.stop();
+                    }
+
+                    soundSource = audioCtx.createBufferSource();
+
+                    soundSource.buffer = buffer;
+                    soundSource.start(0, 0 / 1000);
+                    soundSource.connect(gainNode);
+                    var destination = audioCtx.createMediaStreamDestination();
+                    soundSource.connect(destination);
+//                    connection.attachStreams.push(destination.stream);
+//                    connection.dontCaptureUserMedia = true;
+//                    document.getElementById('openNewSessionButton').disabled = false;
+
+//                    player.src = soundSource.buffer;
+//                    player.
+
+                });
+            });
+            reader.readAsArrayBuffer(files[0]);
+        });
+
+
+
+//        player.onended = function(){
+//            files.shift();
+//            player.src = files[0];
+//        }
     })
 </script>
+
+
+
+<!--<script>-->
+    <!--var connection = new RTCMultiConnection();-->
+    <!--connection.session = {-->
+        <!--audio: true,-->
+        <!--oneway: true-->
+    <!--};-->
+    <!--connection.onstream = function(e) {-->
+        <!--document.body.appendChild(e.mediaElement);-->
+    <!--};-->
+    <!--// connect to signaling gateway-->
+    <!--connection.connect();-->
+    <!--// open new session-->
+    <!--document.getElementById('openNewSessionButton').onclick = function() {-->
+        <!--this.disabled = true;-->
+        <!--connection.open();-->
+    <!--};-->
+    <!--window.AudioContext = window.AudioContext || window.webkitAudioContext;-->
+    <!--var context = new AudioContext();-->
+    <!--var gainNode = context.createGain();-->
+    <!--gainNode.connect(context.destination);-->
+    <!--// don't play for self-->
+<!--//    gainNode.gain.value = 100;-->
+    <!--document.querySelector('input[type=file]').onchange = function() {-->
+        <!--this.disabled = true;-->
+        <!--var reader = new FileReader();-->
+        <!--reader.onload = (function(e) {-->
+            <!--// Import callback function that provides PCM audio data decoded as an audio buffer-->
+            <!--context.decodeAudioData(e.target.result, function(buffer) {-->
+                <!--// Create the sound source-->
+                <!--var soundSource = context.createBufferSource();-->
+                <!--soundSource.buffer = buffer;-->
+                <!--soundSource.start(0, 0 / 1000);-->
+                <!--soundSource.connect(gainNode);-->
+                <!--var destination = context.createMediaStreamDestination();-->
+                <!--soundSource.connect(destination);-->
+                <!--connection.attachStreams.push(destination.stream);-->
+                <!--connection.dontCaptureUserMedia = true;-->
+                <!--document.getElementById('openNewSessionButton').disabled = false;-->
+            <!--});-->
+        <!--});-->
+        <!--reader.readAsArrayBuffer(this.files[0]);-->
+    <!--};-->
+<!--</script>-->
