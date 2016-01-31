@@ -13,6 +13,7 @@
     <li>
         <input type="file" id="files" name="files[]" multiple />
         <output id="playlist"></output>
+        <input type="number" id="distortion" name="distortion" title="distortion" value="400"/>
     </li>
     <li>
         <!--<button class="play" id="play" name="play">Play</button>-->
@@ -40,25 +41,6 @@
         }
 
 
-//        function handleFileSelect(evt) {
-//            var files = evt.target.files; // FileList object
-//
-//            // files is a FileList of File objects. List some properties.
-//            var output = [];
-//            for (var i = 0, f; f = files[i]; i++) {
-//                output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-//                        f.size, ' bytes, last modified: ',
-//                        f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-//                        '</li>');
-//            }
-//            document.getElementById('playlist').innerHTML = '<ul>' + output.join('') + '</ul>';
-//
-//        });
-
-
-//        var peer = new Peer('1234567', { host:'localhost', port: 3000, path: '/peerjs',
-//        });
-
         var peer = new Peer({key: 'a3g2zb1cpmeipb9', id: '1234567'});
 
         var conn = peer.connect('1234567');
@@ -81,6 +63,8 @@
 
 //        var player = $('#player').get(0);
 //        player.loop = true;
+        var remoteDestination;
+
         var audioCtx = new AudioContext();
         var player = $("#player").get(0);
         var soundSource = audioCtx.createMediaElementSource(player);
@@ -88,8 +72,8 @@
 
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         var gainNode = audioCtx.createGain();
-
         var distortion = audioCtx.createWaveShaper();
+        var remoteDestination = audioCtx.createMediaStreamDestination();
 
 
         function makeDistortionCurve(amount) {
@@ -106,7 +90,7 @@
             return curve;
         };
 
-        distortion.curve = makeDistortionCurve(400);
+        distortion.curve = makeDistortionCurve(0);
         distortion.oversample = '4x';
 
 
@@ -114,6 +98,21 @@
         soundSource.connect(distortion);
         distortion.connect(gainNode);
         gainNode.connect(audioCtx.destination);
+        gainNode.connect(remoteDestination);
+
+
+
+        $('#distortion').change(function (e){
+
+            console.log("changed distortion");
+            distortion.disconnect();
+            soundSource.disconnect();
+            distortion = null;
+            distortion = audioCtx.createWaveShaper();
+            soundSource.connect(distortion);
+            distortion.curve = makeDistortionCurve(e);
+            distortion.connect(gainNode);
+        });
 
         $('#play').click(function (e) {
             soundSource.resume();
@@ -131,10 +130,8 @@
                     console.log('file change');
 
                     file = files[0];
-
                     objectUrl = URL.createObjectURL(file);
                     $("#player").prop("src", objectUrl);
-//            player.src = files[0];
                     console.log(files);
 
                     player.play();
