@@ -10,13 +10,17 @@ block content
   ul#cl
     each c in servers
       li
-        a(href="http://localhost:3000/client?id=" + c) Listen to #{c}
+        a(href="client?id=" + c) Listen to #{c}
 
   ul#things
     li
       a(href='broadcaster') Start a stream!
+      
     //li
     //  a(href='client') listen to a stream!
+
+
+
 
 
 
