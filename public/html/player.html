@@ -51,7 +51,9 @@
 <script>
 
 
-
+    $("#repeat").on("change", function(){
+        player.loop = this.checked;
+    });
 
     function makeUL(array) {
         // Create the list element:
@@ -326,10 +328,11 @@
 
             update_playlist();
 
-            objectUrl = URL.createObjectURL(file);
-//            player.src = objectUrl;
-            $("#player").prop("src", objectUrl);
-            player.play();
+            if(file){
+                objectUrl = URL.createObjectURL(file);
+                $("#player").prop("src", objectUrl);
+                player.play();
+            }
 
         });
 
