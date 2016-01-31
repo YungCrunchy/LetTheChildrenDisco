@@ -19,10 +19,10 @@ var ExpressPeerServer = require('peer').ExpressPeerServer;
 //var options = {debug: true};
 //app.use('/peerjs', ExpressPeerServer(server, options));
 
-var server = app.listen(process.env.PORT);
-app.use('/peerjs', require('peer').ExpressPeerServer(server, {
-  debug: true
-}));
+//var server = app.listen(process.env.PORT);
+//app.use('/peerjs', require('peer').ExpressPeerServer(server, {
+//  debug: true
+//}));
 
 //
 //var server = app.listen(9000);
