@@ -2,6 +2,7 @@
 <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 <script src="/js/peer.js"></script>
 <script src="/js/jsmediatags.js"></script>
+<script src="/js/bandwidthhandler.js"></script>
 <!--<script src="//cdn.webrtc-experiment.com/RTCMultiConnection.js"></script>-->
 <!--<script src="//cdn.webrtc-experiment.com/firebase.js"></script>-->
 
@@ -22,9 +23,13 @@
         <!--<button class="play" id="play" name="play">Play</button>-->
         <!--<button class="stop" id="stop" name="stop">Stop</button>-->
         <audio controls="controls" autoplay="autoplay" id="player">
-            <source src="http://webaudioapi.com/samples/audio-tag/chrono.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
+    </li>
+    <li>
+
+        <label for="repeat">Repeat</label>
+        <input type="checkbox" id="repeat" title="repeat" name="repeat"/>
     </li>
 </ul>
 
@@ -98,6 +103,11 @@
             var from = message.from;
             peers[from] = { peerconnection: pc, stream: undefined };
 
+//            peers[from].peerconnection.bandwidth = {
+//                audio: 256,
+//                video: 256
+//            };
+
             // create a data channel for sending the media description
             peers[from].dataChannel = peers[from].peerconnection.createDataChannel('mediaDescription', { reliable: true });
 
@@ -135,7 +145,9 @@
         });
 
 
-        // when a message is received from a listener we'll update the rtc session accordingly
+
+
+            // when a message is received from a listener we'll update the rtc session accordingly
         socket.on('message', function(message) {
             console.log('Received message: ' + JSON.stringify(message.data));
 
@@ -304,10 +316,10 @@
 
 
 
-        navigator.getUserMedia = function(x, y, z){
-            console.log("I was called");
-            return remoteDestination.stream;
-        };
+//        navigator.getUserMedia = function(x, y, z){
+//            console.log("I was called");
+//            return remoteDestination.stream;
+//        };
 
         $('#distortion').change(function (e){
 
