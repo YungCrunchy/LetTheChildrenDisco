@@ -22,6 +22,7 @@ var HEIGHT = 360;
 var SMOOTHING = 0.8;
 var FFT_SIZE = 2048;
 
+
 function VisualizerSample(source, context) {
 
     this.source = source;
@@ -133,6 +134,7 @@ VisualizerSample.prototype.draw = function() {
     if (this.isPlaying) {
         requestAnimFrame(this.draw.bind(this));
     }
+
 };
 
 VisualizerSample.prototype.getFrequencyValue = function(freq) {
