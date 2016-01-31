@@ -106,7 +106,16 @@ VisualizerSample.prototype.draw = function() {
         var offset = HEIGHT - height - 1;
         var barWidth = WIDTH/this.analyser.frequencyBinCount;
         var hue = i/this.analyser.frequencyBinCount * 360;
-        drawContext.fillStyle = 'hsl(' + hue + ', 100%, 50%)';
+
+
+        var my_gradient=drawContext.createLinearGradient(0,0,WIDTH,0);
+        my_gradient.addColorStop(0,"purple");
+        my_gradient.addColorStop(0.5,"red");
+        my_gradient.addColorStop(1,"yellow");
+
+        //drawContext.fillStyle = 'hsl(' + hue + ', 100%, 50%)';
+
+        drawContext.fillStyle = my_gradient;
         drawContext.fillRect(i * barWidth, offset, barWidth, height);
     }
 
@@ -117,8 +126,8 @@ VisualizerSample.prototype.draw = function() {
         var height = HEIGHT * percent;
         var offset = HEIGHT - height - 1;
         var barWidth = WIDTH/this.analyser.frequencyBinCount;
-        drawContext.fillStyle = 'white';
-        drawContext.fillRect(i * barWidth, offset, 1, 2);
+        drawContext.fillStyle = 'lime';
+        drawContext.fillRect(i * barWidth, offset, 3, 20);
     }
 
     if (this.isPlaying) {
