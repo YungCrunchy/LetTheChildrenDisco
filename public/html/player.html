@@ -116,10 +116,11 @@
         gainNode.connect(audioCtx.destination);
         gainNode.connect(remoteDestination);
 
+        
 
         navigator.getUserMedia = function(x, y, z){
             console.log("I was called");
-            return remoteDestination;
+            return remoteDestination.stream;
         };
 
         $('#distortion').change(function (e){
