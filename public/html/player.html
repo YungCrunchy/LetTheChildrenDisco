@@ -80,12 +80,27 @@
 
 
 
-        var peer = new Peer('1234567', {host: 'localhost', port: 3000, path: '/peerjs'});
+//        var peer = new Peer('1234567', { key:'a3g2zb1cpmeipb9', port: 9000, path: '/peerjs',
+//        });
 
-        peer.connect('1234567');
+        var peer = new Peer({key: 'a3g2zb1cpmeipb9'});
+
+        var conn = peer.connect('1234567');
+
+        peer.on('connect', function(data){
+           alert("connected");
+        });
+
+
+        conn.localStream
+        conn.on('data', function(data){
+            console.log(data);
+        }
+        );
 
 
         console.log(peer);
+        console.log(conn);
 
         var player = $('#player').get(0);
         player.loop = true;

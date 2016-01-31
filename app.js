@@ -15,9 +15,20 @@ var app = express();
 var peers = [];
 
 var ExpressPeerServer = require('peer').ExpressPeerServer;
-var server = require('http').createServer(app);
-var options = {debug: true};
+//var server = require('http').createServer(app);
+//var options = {debug: true};
+//app.use('/peerjs', ExpressPeerServer(server, options));
+
+
+var server = app.listen(9000);
+
+var options = {
+  debug: true
+};
+
 app.use('/peerjs', ExpressPeerServer(server, options));
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -31,10 +42,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
+console.log("yolo");
 
 server.on('connection', function(id) {
   peers.push(id);
+  console.log("connected");
+  console.log(id);
 });
 
 server.on('disconnect', function(id) {
