@@ -49,16 +49,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 console.log("yolo");
 
-server.on('connection', function(id) {
-  peers.push(id);
-  console.log("connected");
-  console.log(id);
-});
-
-server.on('disconnect', function(id) {
-  peer_index = peers.indexOf(id);
-  peers.remove(id);
-});
+//server.on('connection', function(id) {
+//  peers.push(id);
+//  console.log("connected");
+//  console.log(id);
+//});
+//
+//server.on('disconnect', function(id) {
+//  peer_index = peers.indexOf(id);
+//  peers.remove(id);
+//});
 
 app.use(function(req, res, next) {
   req.RTC_CLIENTS = peers;
