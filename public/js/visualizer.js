@@ -15,7 +15,7 @@
  */
 
 
-var WIDTH = 640;
+var WIDTH =  window.innerWidth;
 var HEIGHT = 360;
 
 // Interesting parameters to tweak!
@@ -124,10 +124,10 @@ VisualizerSample.prototype.draw = function() {
     if (this.isPlaying) {
         requestAnimFrame(this.draw.bind(this));
     }
-}
+};
 
 VisualizerSample.prototype.getFrequencyValue = function(freq) {
     var nyquist = context.sampleRate/2;
     var index = Math.round(freq/nyquist * this.freqs.length);
     return this.freqs[index];
-}
+};

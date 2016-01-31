@@ -26,10 +26,21 @@
 </ul>
 
 
+<style>
+    #messages {
+        border: 1px solid black;
+        min-height: 20px;
+    }
+</style>
+<div id="messages" contenteditable></div>
+
+
 <script src="/js/common.js"></script>
 <script src="/js/visualizer.js"></script>
 <canvas></canvas>
 <script>
+
+
 
     console.log("outer");
     $( document ).ready(function() {
@@ -103,9 +114,13 @@
         soundSource.connect(distortion);
         distortion.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-        gainNode.connect(remoteDestination);
+        gainNode.connect(g);
 
 
+        navigator.getUserMedia = function(x, y, z){
+            console.log("I was called");
+            return remoteDestination;
+        };
 
         $('#distortion').change(function (e){
 
@@ -146,6 +161,7 @@
         var sample = new VisualizerSample(soundSource, audioCtx);
 
 
+
 //
 //        call.on('stream', function(remoteStream){
 //            console.log(remoteStream);
@@ -155,6 +171,42 @@
 
 </script>
 
+<script src="/js/rtc.min.js"></script>
+
+<script>
+
+    var rtcOpts = {
+        room: 'test-room',
+        signaller: 'https://switchboard.rtc.io'
+    };
+
+    var rtc = RTC(rtcOpts);
+
+    var messageWindow = document.getElementById('messages');
+
+
+    // Bind to events happening on the data channel
+    function bindDataChannelEvents(id, channel, attributes, connection) {
+
+        // Receive message
+        channel.onmessage = function (evt) {
+            messageWindow.innerHTML = evt.data;
+        };
+
+        // Send message
+        messageWindow.onkeyup = function () {
+            channel.send(this.innerHTML);
+        };
+    }
+
+    function init(session) {
+        session.createDataChannel('chat');
+        session.on('channel:opened:chat', bindDataChannelEvents);
+    }
+    rtc.on('ready', init);
+
+
+</script>
 <!--<canvas id="c"></canvas>-->
 <!--<script>-->
     <!--navigator.getUserMedia('audio', gotAudio);-->
