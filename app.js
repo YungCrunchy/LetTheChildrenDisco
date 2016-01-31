@@ -14,6 +14,23 @@ var broadcaster = require('./routes/broadcaster');
 var app = express();
 var peers = [];
 
+
+var server = require('http').Server(app);
+//var port = process.env.PORT || 3000;
+
+// create the switchboard
+var switchboard = require('rtc-switchboard')(server);
+
+//server.listen(port, function(err) {
+//  if (err) {
+//    return;
+//  }
+//
+//  console.log('server listening on port: ' + port);
+//});
+
+
+
 //var ExpressPeerServer = require('peer').ExpressPeerServer;
 //var server = require('http').createServer(app);
 //var options = {debug: true};

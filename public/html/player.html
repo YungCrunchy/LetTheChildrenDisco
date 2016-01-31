@@ -116,7 +116,7 @@
         gainNode.connect(audioCtx.destination);
         gainNode.connect(remoteDestination);
 
-        
+
 
         navigator.getUserMedia = function(x, y, z){
             console.log("I was called");
@@ -178,7 +178,7 @@
 
     var rtcOpts = {
         room: 'test-room',
-        signaller: 'https://switchboard.rtc.io'
+        signaller: 'http://disco.maso.cool'
     };
 
     var rtc = RTC(rtcOpts);
