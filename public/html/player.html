@@ -20,6 +20,14 @@
         <input type="number" id="distortion" name="distortion" title="distortion" value="0"/>
     </li>
     <li>
+        <label for="bqfiltertype">Biquad filter type</label>
+        <input type="text" id="bqfiltertype" title="bqfiltertype" value="lowpass"/>
+        <label for="bqfilterfreq">Biquad filter frequency</label>
+        <input type="number" id="bqfilterfreq" title="bqfilterfreq" value="1000"/>
+        <label for="bqfiltergain">Biquad filter gain</label>
+        <input type="number" id="bqfiltergain" title="bqfiltergain" value="25"/>
+    </li>
+    <li>
         <!--<button class="play" id="play" name="play">Play</button>-->
         <!--<button class="stop" id="stop" name="stop">Stop</button>-->
         <audio controls="controls" autoplay="autoplay" id="player">
@@ -343,6 +351,10 @@
         var distortion = makeDistortion(0);
         var remoteDestination = audioCtx.createMediaStreamDestination();
 
+        var biquadFilter = audioCtx.createBiquadFilter();
+        biquadFilter.type = "lowpass";
+        biquadFilter.frequency.value = 1000;
+        biquadFilter.gain.value = 30;
 
         function makeDistortionCurve(amount) {
             amount = Number(amount);
@@ -369,11 +381,24 @@
         }
 
         soundSource.connect(distortion);
-        distortion.connect(gainNode);
+        distortion.connect(biquadFilter);
+        biquadFilter.connect(gainNode);
         gainNode.connect(audioCtx.destination);
         gainNode.connect(remoteDestination);
 
-        
+
+        $('#bqfilterfreq').change(function (e){
+            biquadFilter.frequency.value = Number(this.value);
+            console.log(this.value);
+        });
+
+        $('#bqfiltergain').change(function(e){
+            biquadFilter.gain.value = Number(this.value);
+        });
+
+        $('#bqfiltertype').change(function(e){
+            biquadFilter.type = this.value;
+        });
 
         $('#distortion').change(function (e){
 
