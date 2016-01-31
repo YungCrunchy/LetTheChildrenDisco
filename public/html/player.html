@@ -31,6 +31,10 @@
         <label for="repeat">Repeat</label>
         <input type="checkbox" id="repeat" title="repeat" name="repeat"/>
     </li>
+    <li>
+        <p>Up Next</p>
+        <ul id="playlist_list"></ul>
+    </li>
 </ul>
 
 <h4 id="counter">Connected peers: 0</h4>
@@ -48,11 +52,35 @@
 
 
 
+
+    function makeUL(array) {
+        // Create the list element:
+        var list = document.createElement('ul');
+        list.id="playlist_list";
+
+        for(var i = 0; i < array.length; i++) {
+            // Create the list item:
+            var item = document.createElement('li');
+
+            // Set its contents:
+            item.appendChild(document.createTextNode(array[i].name));
+
+            // Add it to the list:
+            list.appendChild(item);
+        }
+
+        // Finally, return the constructed list:
+        return list;
+    }
+
+
     console.log("outer");
     $( document ).ready(function() {
 
 
-        var files = [];
+        var playlist = [];
+
+
 
         // from http://www.html5rocks.com/en/tutorials/file/dndfiles/
         // Check for the various File API support.
@@ -289,6 +317,22 @@
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         var audioCtx = new AudioContext();
         var player = $("#player").get(0);
+
+        player.addEventListener("ended", function() {
+           player.currentTime = 0;
+
+            console.log(files);
+            file = playlist.shift();
+
+            update_playlist();
+
+            objectUrl = URL.createObjectURL(file);
+//            player.src = objectUrl;
+            $("#player").prop("src", objectUrl);
+            player.play();
+
+        });
+
         var soundSource = audioCtx.createMediaElementSource(player);
 
 
@@ -352,19 +396,35 @@
         $('#files').change(function (e) {
 //
 
-                    var files = e.currentTarget.files;
-                    console.log('file change');
-
-                    file = files[0];
-                    objectUrl = URL.createObjectURL(file);
-                    $("#player").prop("src", objectUrl);
-                    console.log(files);
+                var files = e.currentTarget.files;
+                console.log('file change');
 
 
-                    playStream();
-                    player.play();
+                playlist = [];
+                for(var i=0; i<files.length; i++){
+                    playlist.push(files[i]);
                 }
+
+                file = playlist.shift();
+                objectUrl = URL.createObjectURL(file);
+                $("#player").prop("src", objectUrl);
+                console.log(files);
+
+
+                update_playlist();
+
+
+                playStream();
+                player.play();
+            }
         );
+
+
+        function update_playlist() {
+            $("#playlist_list").replaceWith(makeUL(playlist));
+
+        }
+
 
         var sample = new VisualizerSample(soundSource, audioCtx);
 
