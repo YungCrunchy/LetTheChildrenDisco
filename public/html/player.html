@@ -25,6 +25,8 @@
     </li>
 </ul>
 
+<h4 id="counter"></h4>
+<h4 id="room"></h4>
 
 <style>
     #messages {
@@ -37,6 +39,8 @@
 
 <script src="/js/common.js"></script>
 <script src="/js/visualizer.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
 <canvas></canvas>
 <script>
 
@@ -57,36 +61,216 @@
         }
 
 
-        var peer = new Peer({key: 'a3g2zb1cpmeipb9', id: '1234567'});
+//        var player = $('#player').get(0);
+//        player.loop = true;
 
-        var conn = peer.connect('1234567');
 
-        conn.send("hello");
 
-        peer.on('connect', function (data) {
-            alert("connected");
+
+        var socket = io.connect();
+
+        // webrtc connection configuration
+        var pc_config = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
+
+        // keep track of peers and the id of this session
+        var peers = {};
+        var myId;
+
+
+        // after connecting to the server an ID for this session is received and saved.
+        socket.on('your-id', function(id) {
+            myId = id;
+            console.log('id = ' + id);
+
+            var clientURL = window.location.protocol + '//' + window.location.host + '/client?id=' + myId;
+            room.innerHTML = 'Invite others to listen to your stream by sharing this link:<br/><a href="' + clientURL + '" target="_blank">' + clientURL + '</a>';
+        });
+
+        socket.on('disconnected', function(from) {
+            peers[from] = undefined;
         });
 
 
-        conn.on('data', function (data) {
-                    console.log(data);
+        // when a listener logs on to the sessions we'll setup webrtc signalling for the session and check if we can start
+        // streaming media
+        socket.on('logon', function(message) {
+            pc = new RTCPeerConnection(pc_config, { optional: [ { RtpDataChannels: true } ]});
+
+            pc.onicecandidate = function(event) {
+                socket.emit('message', { from: myId, to: message.from, data: { type: 'candidate', candidate: event.candidate } } );
+            }
+
+            var from = message.from;
+            peers[from] = { peerconnection: pc, stream: undefined };
+
+            // create a data channel for sending the media description
+            peers[from].dataChannel = peers[from].peerconnection.createDataChannel('mediaDescription', { reliable: true });
+            peers[from].dataChannel.onopen = function() {
+                startPlayingIfPossible(from);
+            };
+
+            peers[from].peerconnection.createOffer(function(desc) {
+                gotDescription(from, desc);
+            }, failed);
+
+            counter.innerHTML = Object.keys(peers).length;
+        });
+
+
+        // when a listener leaves remove the rtc stream for that peer
+        socket.on('logoff', function(message) {
+            console.log('received logoff message');
+
+            try {
+                peers[message.from].peerconnection.removeStream(peers[message.from].stream);
+            } catch (err) {
+
+            }
+
+            peers[message.from].stream = undefined;
+            delete peers[message.from];
+            counter.innerHTML = Object.keys(peers).length;
+        });
+
+
+        // when a message is received from a listener we'll update the rtc session accordingly
+        socket.on('message', function(message) {
+            console.log('Received message: ' + JSON.stringify(message.data));
+
+            if (message.data.type === 'candidate') {
+                if (message.data.candidate) {
+                    peers[message.from].peerconnection.addIceCandidate(new RTCIceCandidate(message.data.candidate));
                 }
-        );
+            } else if (message.data.type === 'sdp') {
+                peers[message.from].peerconnection.setRemoteDescription(new RTCSessionDescription(message.data.sdp));
+            }
+        });
 
 
-        console.log(peer);
-        console.log(conn);
 
-//        var player = $('#player').get(0);
-//        player.loop = true;
+        // is called when SDP is received from a connected listener
+        function gotDescription(from, desc) {
+            peers[from].peerconnection.setLocalDescription(desc);
+            socket.emit('message', { from: myId, to: from, data: { type: 'sdp', sdp: desc } });
+        }
+
+
+
+        // checks if media is present and starts streaming media to a connected listener if possible
+        function startPlayingIfPossible(from) {
+            // add the stream to the peerconnection for this connection
+            if (soundSource && remoteDestination) {
+                var constraints = { mandatory: {}, optional: [] };
+                // constraints.optional[0] = { 'bandwidth' : 100 }; // does not seem to influence quality
+                peers[from].peerconnection.addStream(remoteDestination.stream, constraints);
+                peers[from].stream = remoteDestination.stream;
+                peers[from].peerconnection.createOffer(function(desc) {
+                    gotDescription(from, desc);
+                }, failed);
+
+                sendMediaDescription(peers[from].dataChannel);
+            }
+        }
+
+
+
+        // Sends media meta information over a rtc data channel to a connected listener
+        function sendMediaDescription(channel) {
+            if (mediaDescription && channel.readyState === 'open') {
+                var data = JSON.stringify(mediaDescription);
+                channel.send(data);
+            }
+        }
+
+
+        function onDataChannelOpen() {
+            sendMediaDescription(this);
+        }
+
+
+        function failed(code) {
+            log("Failure callback: " + code);
+        }
+
+
+
+        // starts playing a media stream from a given offset.
+        function playStream(offset) {
+            offset = offset ? offset : 0;
+
+//            soundSource
+//            mediaSource = context.createBufferSource();
+//            mediaSource.buffer = mediaBuffer;
+//            mediaSource.start(0, offset / 1000);
+//            mediaSource.connect(gainNode);
+
+            // setup remote stream
+//            remoteDestination = context.createMediaStreamDestination();
+            gainNode.connect(remoteDestination);
+
+            for (var peer in peers) {
+                startPlayingIfPossible(peer);
+            }
+        }
+
+        // stops playing the stream and removes the stream from peer connections
+        function stopStream() {
+            for (var peer in peers) {
+                if (peers[peer].stream) {
+                    peers[peer].stream.stop();
+                    peers[peer].peerconnection.removeStream(peers[peer].stream);
+                    peers[peer].stream = undefined;
+                }
+            }
+
+            if (mediaSource) mediaSource.stop(0);
+        }
+
+        // sets the volume
+        function changeVolume(element) {
+            var volume = element.value;
+            var fraction = parseInt(element.value, 10) / parseInt(element.max, 10);
+            gainNode.gain.value = fraction * fraction;
+        }
+
+        // mutes the volume
+        function toggleMute() {
+            if (muted) {
+                gainNode.gain.value = muted;
+                muted = undefined;
+            } else {
+                muted = gainNode.gain.value;
+                gainNode.gain.value = 0;
+            }
+        }
+
+        // toggles pause resume
+        function togglePlay() {
+            if (stop) {
+                var offset = stop - start;
+                playStream(offset);
+                start = Date.now() - offset;
+                stop = undefined;
+            } else {
+                stopStream(offset);
+                stop = Date.now();
+            }
+        }
+
+
+
+
+
+
+
         var remoteDestination;
 
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
         var audioCtx = new AudioContext();
         var player = $("#player").get(0);
         var soundSource = audioCtx.createMediaElementSource(player);
 
 
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
         var gainNode = audioCtx.createGain();
         var distortion = audioCtx.createWaveShaper();
         var remoteDestination = audioCtx.createMediaStreamDestination();
@@ -155,6 +339,8 @@
                     $("#player").prop("src", objectUrl);
                     console.log(files);
 
+
+                    playStream();
                     player.play();
                 }
         );
@@ -172,39 +358,43 @@
 
 </script>
 
-<script src="/js/rtc.min.js"></script>
+
+
+
+
+<!--<script src="/js/rtc.min.js"></script>-->
 
 <script>
 
-    var rtcOpts = {
-        room: 'test-room',
-        signaller: 'http://disco.maso.cool'
-    };
-
-    var rtc = RTC(rtcOpts);
-
-    var messageWindow = document.getElementById('messages');
-
-
-    // Bind to events happening on the data channel
-    function bindDataChannelEvents(id, channel, attributes, connection) {
-
-        // Receive message
-        channel.onmessage = function (evt) {
-            messageWindow.innerHTML = evt.data;
-        };
-
-        // Send message
-        messageWindow.onkeyup = function () {
-            channel.send(this.innerHTML);
-        };
-    }
-
-    function init(session) {
-        session.createDataChannel('chat');
-        session.on('channel:opened:chat', bindDataChannelEvents);
-    }
-    rtc.on('ready', init);
+//    var rtcOpts = {
+//        room: 'test-room',
+//        signaller: 'http://disco.maso.cool'
+//    };
+//
+//    var rtc = RTC(rtcOpts);
+//
+//    var messageWindow = document.getElementById('messages');
+//
+//
+//    // Bind to events happening on the data channel
+//    function bindDataChannelEvents(id, channel, attributes, connection) {
+//
+//        // Receive message
+//        channel.onmessage = function (evt) {
+//            messageWindow.innerHTML = evt.data;
+//        };
+//
+//        // Send message
+//        messageWindow.onkeyup = function () {
+//            channel.send(this.innerHTML);
+//        };
+//    }
+//
+//    function init(session) {
+//        session.createDataChannel('chat');
+//        session.on('channel:opened:chat', bindDataChannelEvents);
+//    }
+//    rtc.on('ready', init);
 
 
 </script>
@@ -225,6 +415,15 @@
 <!--</script>-->
 
 
+
+<!--<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>-->
+<!--<script>-->
+    <!--var socket = io.connect('http://localhost:3000');-->
+    <!--socket.on('news', function (data) {-->
+        <!--console.log(data);-->
+        <!--socket.emit('my other event', { my: 'data' });-->
+    <!--});-->
+<!--</script>-->
 
 <script>
 //    document.querySelector('button').addEventListener('click', function() {

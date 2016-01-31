@@ -6,50 +6,28 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 
+var uuid = require('node-uuid');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var client = require('./routes/client');
 var broadcaster = require('./routes/broadcaster');
 
 var app = express();
+var socket_io = require('socket.io');
+
+var io           = socket_io();
+app.io           = io;
+
 var peers = [];
 
-
-var server = require('http').Server(app);
-//var port = process.env.PORT || 3000;
-
-// create the switchboard
-var switchboard = require('rtc-switchboard')(server);
-
-//server.listen(port, function(err) {
-//  if (err) {
-//    return;
-//  }
-//
-//  console.log('server listening on port: ' + port);
+//io.on('connection', function (socket) {
+//  socket.emit('news', { hello: 'world' });
+//  socket.on('my other event', function (data) {
+//    console.log(data);
+//  });
 //});
 
-
-
-//var ExpressPeerServer = require('peer').ExpressPeerServer;
-//var server = require('http').createServer(app);
-//var options = {debug: true};
-//app.use('/peerjs', ExpressPeerServer(server, options));
-
-//var server = app.listen(process.env.PORT);
-//app.use('/peerjs', require('peer').ExpressPeerServer(server, {
-//  debug: true
-//}));
-
-//
-//var server = app.listen(9000);
-//
-//var options = {
-//  debug: true
-//};
-//
-//app.use('/peerjs', ExpressPeerServer(server, options));
-
+//server.listen(80);
 
 
 // view engine setup
@@ -66,16 +44,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 console.log("yolo");
 
-//server.on('connection', function(id) {
-//  peers.push(id);
-//  console.log("connected");
-//  console.log(id);
-//});
-//
-//server.on('disconnect', function(id) {
-//  peer_index = peers.indexOf(id);
-//  peers.remove(id);
-//});
 
 app.use(function(req, res, next) {
   req.RTC_CLIENTS = peers;
@@ -119,5 +87,59 @@ app.use(function(err, req, res, next) {
   });
 });
 
+
+
+
+// keeping track of connections
+var sockets = {};
+
+io.sockets.on('connection', function(socket) {
+  var id;
+
+  // determine an identifier that is unique for us.
+
+  do {
+    id = uuid.v4();
+    //id = "100";
+  } while (sockets[id]);
+
+  // we have a unique identifier that can be sent to the client
+
+  sockets[id] = socket;
+  socket.emit('your-id', id);
+
+  // remove references to the disconnected socket
+  socket.on('disconnect', function() {
+    sockets[socket] = undefined;
+    delete sockets[socket];
+  });
+
+  // when a message is received forward it to the addressee
+  socket.on('message', function(message) {
+    if (sockets[message.to]) {
+      sockets[message.to].emit('message', message);
+    } else {
+      socket.emit('disconnected', message.from);
+    }
+  });
+
+  // when a listener logs on let the media streaming know about it
+  socket.on('logon', function(message) {
+    if (sockets[message.to]) {
+      sockets[message.to].emit('logon', message);
+    } else {
+      socket.emit('error', 'Does not exsist at server.');
+    }
+  });
+
+  socket.on('logoff', function(message) {
+    if (sockets[message.to]) {
+      sockets[message.to].emit('logoff', message);
+    } else {
+      socket.emit('error', 'Does not exsist at server.');
+    }
+  });
+
+});
 
 module.exports = app;
