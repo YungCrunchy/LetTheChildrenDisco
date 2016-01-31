@@ -93,6 +93,7 @@ app.use(function(err, req, res, next) {
 // keeping track of connections
 var sockets = {};
 
+
 io.sockets.on('connection', function(socket) {
   var id;
 
@@ -108,10 +109,17 @@ io.sockets.on('connection', function(socket) {
   sockets[id] = socket;
   socket.emit('your-id', id);
 
+
+  peers.push(id);
+
+  console.log(peers);
+
   // remove references to the disconnected socket
   socket.on('disconnect', function() {
     sockets[socket] = undefined;
     delete sockets[socket];
+    var index = peers.indexOf(id);
+    peers.splice(index, 1);
   });
 
   // when a message is received forward it to the addressee

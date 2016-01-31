@@ -5,11 +5,18 @@ block content
   link(href='/public/stylesheets/style.css', rel='stylesheet')
   p Welcome to #{title}
 
+
+
+  ul#cl
+    each c in servers
+      li
+        a(href="http://localhost:3000/client?id=" + c) Listen to #{c}
+
   ul#things
     li
       a(href='broadcaster') Start a stream!
-    li
-      a(href='client') listen to a stream!
+    //li
+    //  a(href='client') listen to a stream!
 
 
 
