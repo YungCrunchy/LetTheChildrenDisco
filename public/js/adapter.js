@@ -45,7 +45,7 @@ if (navigator.mozGetUserMedia) {
 
     element.srcObject = stream;
     //element.mozSrcObject = stream;
-    element.play();
+    //element.play();
   };
 
   reattachMediaStream = function(to, from) {

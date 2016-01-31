@@ -171,19 +171,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
         var source = context.createMediaStreamSource(event.stream);
 
-
-
         var sample = new VisualizerSample(source, context);
+
 
         player.play();
         monitorBitrate();
         player.onloadeddata = function (event) {
             console.log(event);
-        }
+        };
 
         player.onprogress = function (event) {
             console.log(event);
-        }
+        };
     }
 
     var timestampPrev = 0;

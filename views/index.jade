@@ -1,20 +1,22 @@
 extends layout
 
 block content
-  h1= title
-  link(href='/public/stylesheets/style.css', rel='stylesheet')
-  p Welcome to #{title}
+  #row
+    #container.col-md-12
+      //h1= title
+      link(href='/public/stylesheets/style.css', rel='stylesheet')
+      p Welcome to #{title}
 
 
 
-  ul#cl
-    each c in servers
-      li
-        a(href="client?id=" + c) Listen to #{c}
+      ul#cl
+        each c in servers
+          li
+            a(class="btn btn-success" href="client?id=" + c) Listen to #{c}
 
-  ul#things
-    li
-      a(href='broadcaster') Start a stream!
+      ul#things
+        li
+          a(class="btn btn-danger" href='broadcaster') Start a stream!
 
     //li
     //  a(href='client') listen to a stream!
