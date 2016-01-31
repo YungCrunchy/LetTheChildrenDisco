@@ -34,6 +34,8 @@
 </ul>
 
 <h4 id="counter">Connected peers: 0</h4>
+<h4 id="peerlist"></h4>
+
 <h4 id="room"></h4>
 
 
@@ -122,6 +124,9 @@
             }, failed);
 
             counter.innerHTML = "Connected Peers: " + Object.keys(peers).length;
+            peerlist.innerHTML = Object.keys(peers).join("<br>");
+
+
             console.log("added peer");
 
             startPlayingIfPossible(from);
@@ -142,6 +147,8 @@
             peers[message.from].stream = undefined;
             delete peers[message.from];
             counter.innerHTML = "Connected Peers: " + Object.keys(peers).length;
+            peerlist.innerHTML = Object.keys(peers).join("<br>");
+
         });
 
 
