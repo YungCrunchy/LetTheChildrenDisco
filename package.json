@@ -14,7 +14,8 @@
     "jade": "~1.11.0",
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0",
-    "peer": "0.2.8"
+    "peer": "0.2.8",
+    "rtcmulticonnection-v3": "3.2.88"
   },
   "engines": {
     "node": "4.2.6"
