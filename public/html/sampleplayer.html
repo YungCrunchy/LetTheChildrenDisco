@@ -1,0 +1,53 @@
+
+<div id="container">
+
+
+
+    <div id="wrapper">
+        <div id="content">
+
+
+            <div class="post">
+                <h2>Audio Tag</h2>
+                <p>
+                <p>Illustrates the use of MediaElementAudioSourceNode to wrap the audio tag.</p>
+
+                </p>
+                <p>
+                <p>A couple issues: <code>onload</code> is required <a href="http://crbug.com/112368">http://crbug.com/112368</a>. Also,
+                    reassigning the <code>@src</code> attribute causes audio glitches
+                    <a href="http://crbug.com/162528">http://crbug.com/162528</a>.</p>
+
+                <p><input value="http://webaudioapi.com/samples/audio-tag/chrono.mp3" placeholder="URL to audio file...">
+                    <button onclick="sample.play(document.querySelector('input').value)">Load URL</button></p>
+
+                <script src="http://webaudioapi.com/samples/audio-tag/static/js/shared.js"></script>
+                <script src="http://webaudioapi.com/samples/audio-tag/audio-tag-sample.js"></script>
+                <script>
+                    var input = document.querySelector('input');
+                    var sample = new AudioTagSample();
+
+                    sample.play(input.value);
+                </script>
+
+                </p>
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-17930798-28']);
+        _gaq.push(['_trackPageview']);
+
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+
+    </script>
